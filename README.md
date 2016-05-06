@@ -46,6 +46,11 @@ Some very basic linting has been added to ensure files parse properly through pa
 
   `make test`
 
+## SELinux box notes
+
+* Requires the ovf from another build to be around. This is usually inside the templates/centos-7.2 directory.
+* the template json may have some hard coded stuff.
+
 ### Issues
 
 Please open any issues within the CPR ( Community Package Repository ) project on the [Puppet Labs issue tracker](https://tickets.puppetlabs.com/browse/CPR).
