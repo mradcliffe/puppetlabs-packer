@@ -44,6 +44,7 @@
         "PUPPET_NFS={{user `puppet_nfs`}}"
       ],
       "scripts": [
+        "../../scripts/cleanup-yum.sh",
         "../../scripts/cleanup-packer.sh",
         "../../scripts/cleanup-scrub.sh"
       ]
