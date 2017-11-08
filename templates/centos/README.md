@@ -19,7 +19,7 @@ one need to build the base template
 Optional variables should be used in the -var option.
 
 
-keep in mind that the ordering matters for the \*variables\* json files
+keep in mind that the ordering matters for the \*vars\* json files
 when used with the -var-file option,
 the -var file option will overule everything
 
@@ -33,9 +33,9 @@ all boxes build an come up properly,
 Command to build a box :
 
 ```
-~/bin/packer build -var-file=builder.variables.json -var-file=provisioner.variables.json -var-file="i386.centos-6.8.variables.json" -var "iso_url=/data/johan/iso_images/CentOS-6.8-i386-bin-DVD1.iso" libvirt.base.json
-~/bin/packer build -var-file=builder.variables.json -var-file=provisioner.variables.json -var-file="i386.centos-6.8.variables.json" libvirt.nocm.json
-~/bin/packer build -var-file=builder.variables.json -var-file=provisioner.variables.json -var-file="i386.centos-6.8.variables.json" libvirt.puppet.json
+~/bin/packer build -var-file=builder.vars.json -var-file=provisioner.vars.json -var-file="i386.centos-6.8.vars.json" -var "iso_url=/data/johan/iso_images/CentOS-6.8-i386-bin-DVD1.iso" libvirt.base.json
+~/bin/packer build -var-file=builder.vars.json -var-file=provisioner.vars.json -var-file="i386.centos-6.8.vars.json" libvirt.nocm.json
+~/bin/packer build -var-file=builder.vars.json -var-file=provisioner.vars.json -var-file="i386.centos-6.8.vars.json" libvirt.puppet.json
 ```
 
 ## testing
@@ -43,7 +43,7 @@ Command to build a box :
 ```
   for i in `ls *centos*.json`
   do
-    ~/bin/packer validate --syntax-only -var-file=builder.variables.json -var-file=provisioner.variables.json -var-file=$i libvirt.base.json
+    ~/bin/packer validate --syntax-only -var-file=builder.vars.json -var-file=provisioner.vars.json -var-file=$i libvirt.base.json
   done
 ```
 
