@@ -1,0 +1,75 @@
+{
+  "variables": {
+    "template_name": null,
+    "template_os": null,
+    "iso_url": null,
+    "iso_checksum": null,
+    "iso_checksum_type": null,
+    "puppet_aio": "{{env `PUPPET_NFS`}}",
+    "floppy_dirs": null,
+    "floppy_files": null,
+    "boot_command": null,
+    "project_root": "../../../..",
+    "headless": "true",
+    "template_config": "vagrant-selinux",
+    "provision": "virtualbox",
+    "shutdown_command": "/sbin/halt -h -p",
+    "packer_sha": "{{env `PACKER_SHA`}}",
+    "packer_source_dir": "{{env `PACKER_VM_SRC_DIR`}}",
+    "packer_output_dir": "{{env `PACKER_VM_OUT_DIR`}}",
+    "qa_root_passwd": "{{env `QA_ROOT_PASSWD`}}"
+  },
+
+  "builders": [
+    {
+      "name": "{{user `template_name`}}-{{user `provisioner`}}-{{user `template_config`}}",
+      "vm_name": "packer-{{build_name}}",
+      "type": "virtualbox-ovf",
+      "source_path": "{{user `packer_source_dir`}}/output-{{user `template_name`}}-{{user `provisioner`}}-base/packer-{{user `template_name`}}-{{user `provisioner`}}-base.ovf",
+      "output_directory": "{{user `packer_output_dir`}}/output-{{build_name}}",
+      "headless": "{{user `headless`}}",
+      "ssh_username": "root",
+      "ssh_password": "puppet",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "{{user `shutdown_command`}}"
+    }
+  ],
+
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sh '{{.Path}}' {{user `required_modules`}} saz-sudo",
+      "environment_vars": [
+        "TEMPLATE={{user `template_name`}}",
+        "PUPPET_NFS={{user `puppet_nfs`}}"
+      ],
+      "scripts": [
+        "{{user `project_root`}}/scripts/bootstrap-puppetless.sh",
+        "{{user `project_root`}}/scripts/enable-selinux.sh"
+      ]
+    },
+
+    {
+      "type": "shell",
+      "execute_command": "{{.Vars}} sh '{{.Path}}' {{user `required_modules`}}",
+      "environment_vars": [
+        "TEMPLATE={{user `template_name`}}",
+        "PUPPET_NFS={{user `puppet_nfs`}}"
+      ],
+      "scripts": [
+        "{{user `project_root`}}/scripts/cleanup-yum.sh",
+        "{{user `project_root`}}/scripts/cleanup-packer.sh",
+        "{{user `project_root`}}/scripts/cleanup-scrub.sh"
+      ]
+    }
+  ],
+
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": "output/{{.Provider}}/{{user `template_name`}}-{{.Provider}}-selinux.box"
+    }
+  ]
+
+}

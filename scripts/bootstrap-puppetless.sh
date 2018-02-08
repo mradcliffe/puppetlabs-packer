@@ -2,15 +2,18 @@
 
 # Ensure that vagrant group is present
 if [[ `grep -v -q "^vagrant" /etc/group` ]]; then
+    echo "Adding vagrant group..."
     groupadd vagrant
 fi
 
 # Ensure that vagrant user is present
 if [[ `id -u vagrant >/dev/null 2>&1` ]]; then
     # Modify the existing user.
+    echo "Found vagrant user. Setting group to vagrant..."
     usermod -g vagrant -s /bin/bash
 else
     # Create a new user.
+    echo "Creating vagrant user..."
     useradd -g vagrant -s /bin/bash
 fi
 

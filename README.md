@@ -48,8 +48,15 @@ Some very basic linting has been added to ensure files parse properly through pa
 
 ## SELinux box notes
 
-* Requires the ovf from another build to be around. This is usually inside the templates/centos-7.2 directory.
-* the template json may have some hard coded stuff.
+* Build the base box for the centos version you want:
+   * `cd templates/centos/7.4/x86_64`
+   * `PACKER_VM_OUT_DIR=. packer build build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.base.json`
+   * You need to go through VirtualBox's GUI to run through CentOS installation.
+   * Import the box into vagrant to get an ovf/vmdk file that you can copy to a directory you'll specify with `PACKER_VM_SRC_DIR`. Rename "box.ovf" to `output-centos-7.4-x86_64--base/packer-centos-7.4-x86_64--base.ovf`.
+* Build the selinux box for the centos version you want based on the base box of that version:
+   * `cd templates/centos/7.4/x86_64`
+   * `PACKER_VM_SRC_DIR=~/ PACKER_VM_OUT_DIR=. packer build build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.vagrant.selinux.json`
+   * box file should be in the current directory.
 
 ### Issues
 
