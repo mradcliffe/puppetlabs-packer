@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Ensure that vagrant group is present
-if [[ `grep -v -q "^vagrant" /etc/group` ]]; then
+if [[ ! `getent group vagrant` ]]; then
     echo "Adding vagrant group..."
     groupadd vagrant
 fi
@@ -10,11 +10,11 @@ fi
 if [[ `id -u vagrant >/dev/null 2>&1` ]]; then
     # Modify the existing user.
     echo "Found vagrant user. Setting group to vagrant..."
-    usermod -g vagrant -s /bin/bash
+    usermod -g vagrant -s /bin/bash vagrant
 else
     # Create a new user.
     echo "Creating vagrant user..."
-    useradd -g vagrant -s /bin/bash
+    useradd -g vagrant -s /bin/bash vagrant
 fi
 
 # Ensure that the vagrant user ssh directory exists.

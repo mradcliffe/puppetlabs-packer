@@ -40,6 +40,7 @@
     {
       "type": "shell",
       "execute_command": "{{.Vars}} sh '{{.Path}}' {{user `required_modules`}} saz-sudo",
+      "expect_disconnect": true,
       "environment_vars": [
         "TEMPLATE={{user `template_name`}}",
         "PUPPET_NFS={{user `puppet_nfs`}}"
@@ -57,6 +58,7 @@
         "TEMPLATE={{user `template_name`}}",
         "PUPPET_NFS={{user `puppet_nfs`}}"
       ],
+      "pause_before": "30s",
       "scripts": [
         "{{user `project_root`}}/scripts/cleanup-yum.sh",
         "{{user `project_root`}}/scripts/cleanup-packer.sh",
@@ -68,7 +70,7 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": "output/{{.Provider}}/{{user `template_name`}}-{{.Provider}}-selinux.box"
+      "output": "output/{{.Provider}}/packer-{{user `template_name`}}-{{.Provider}}-selinux.box"
     }
   ]
 
