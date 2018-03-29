@@ -93,6 +93,7 @@
     {
       "type"                                 : "shell",
       "environment_vars"                     : [ "PUPPET_AIO={{user `puppet_aio`}}" ],
+      "expect_disconnect"                    : true,
       "scripts"                              : [
 
                                                  "{{user `project_root`}}/scripts/enable-selinux.sh",
