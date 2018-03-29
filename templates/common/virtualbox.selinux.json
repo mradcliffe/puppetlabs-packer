@@ -12,7 +12,7 @@
 
       "project_root"                           : "../../../..",
       "headless"                               : "true",
-      "template_config"                        : "puppet-selinux",
+      "template_config"                        : "nocm-selinux",
       "provisioner"                            : "virtualbox",
       "shutdown_command"                       : "/sbin/halt -h -p",
 
@@ -23,7 +23,7 @@
       "virtualbox_puppet_provisioning_scripts" : "../../../../scripts/bootstrap-aio.sh"
     },
 
-    "description"                              : "Builds a Linux vagrantbox puppet VM for use with virtualbox",
+    "description"                              : "Builds a Linux vagrantbox nocm VM with SELinux for use with virtualbox without requiring a reboot",
 
     "builders": [
     {
@@ -71,7 +71,7 @@
       "type"                                   : "shell",
       "execute_command"                        : "{{.Vars}} sh '{{.Path}}' {{user `vagrant_required_modules`}}",
       "environment_vars"                       : [ "PUPPET_AIO={{user `puppet_aio`}}" ],
-      "scripts"                                : [ "{{user `virtualbox_puppet_provisioning_scripts`}}" ]
+      "scripts"                                : [ "{{user `virtualbox_nocm_provisioning_scripts`}}" ]
     },
 
     {
@@ -95,7 +95,8 @@
       "environment_vars"                       : [ "PUPPET_AIO={{user `puppet_aio`}}" ],
       "scripts"                                : [
                                                    "{{user `project_root`}}/scripts/enable-selinux.sh",
-        					   "{{user `project_root`}}/scripts/cleanup-yum.sh",
+                                                   "{{user `project_root`}}/scripts/cleanup-yum.sh",
+                                                   "{{user `project_root`}}/scripts/cleanup-aio.sh",
                                                    "{{user `project_root`}}/scripts/cleanup-packer.sh",
                                                    "{{user `project_root`}}/scripts/cleanup-scrub.sh"
                                                  ]
