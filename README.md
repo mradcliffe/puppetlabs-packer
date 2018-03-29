@@ -50,12 +50,10 @@ Some very basic linting has been added to ensure files parse properly through pa
 
 * Build the base box for the centos version you want:
    * `cd templates/centos/7.4/x86_64`
-   * `PACKER_VM_OUT_DIR=. packer build build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.base.json`
-   * You need to go through VirtualBox's GUI to run through CentOS installation.
-   * Import the box into vagrant to get an ovf/vmdk file (`~/.vagrant.d/boxes/packer-centos-7.4-x86_64-virtualbox-selinux/0/virtualbox/`) that you can copy to a directory you'll specify with `PACKER_VM_SRC_DIR`. Rename "box.ovf" to `output-packer-centos-7.4-x86_64--base/packer-centos-7.4-x86_64--base.ovf` and copy the vmdk file as-is.
+   * `PACKER_VM_OUTPUT_DIR=. packer build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.base.json`
 * Build the selinux box for the centos version you want based on the base box of that version:
    * `cd templates/centos/7.4/x86_64`
-   * `PACKER_VM_SRC_DIR=~/ PACKER_VM_OUT_DIR=. packer build build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.vagrant.selinux.json`
+   * `PACKER_VM_OUTPUT_DIR=. packer build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.selinux.json`
    * box file should be in the current directory.
 
 ### Issues
