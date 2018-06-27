@@ -10,20 +10,11 @@
     "template_name"                         : null,
     "update_system"                         : null,
     "version"                               : null,
-    "output_directory"                      : "{{env `PACKER_VM_OUT_DIR`}}",
-    "source_directory"                      : "{{env `PACKER_VM_SRC_DIR`}}",
-    "ssh_password"                          : "{{env `QA_ROOT_PASSWORD`}}",
-    "packer_vcenter_host"                   : "{{env `PACKER_VCENTER_HOST`}}",
-    "packer_vcenter_username"               : "{{env `PACKER_VCENTER_USERNAME`}}",
-    "packer_vcenter_password"               : "{{env `PACKER_VCENTER_PASSWORD`}}",
-    "packer_vcenter_dc"                     : "{{env `PACKER_VCENTER_DC`}}",
-    "packer_vcenter_cluster"                : "{{env `PACKER_VCENTER_CLUSTER`}}",
-    "packer_vcenter_datastore"              : "{{env `PACKER_VCENTER_DATASTORE`}}",
-    "packer_vcenter_folder"                 : "{{env `PACKER_VCENTER_FOLDER`}}",
-    "packer_vcenter_net"                    : "{{env `PACKER_VCENTER_NET`}}",
-    "packer_vcenter_insecure"               : "{{env `PACKER_VCENTER_INSECURE`}}",
+    "ssh_password"                          : "{{env `QA_ROOT_PASSWD_PLAIN`}}",
     "packer_sha"                            : "{{env `PACKER_SHA`}}",
-    "support_status"                        : "puppet_maintained"
+    "support_status"                        : "puppet_maintained",
+    "packer_output_dir"                     : "{{env `PACKER_VM_OUT_DIR`}}",
+    "packer_source_dir"                     : "{{env `PACKER_VM_SRC_DIR`}}"
   },
 
   "builders": [
@@ -31,8 +22,8 @@
       "type"                                : "vmware-vmx",
       "name"                                : "{{user `template_name`}}-vmware-vsphere-nocm",
       "vm_name"                             : "packer-{{build_name}}",
-      "source_path"                         : "{{user `source_directory`}}/{{user `template_name`}}-vmware-base/packer-{{user `template_name`}}-vmware-base.vmx",
-      "output_directory"                    : "{{user `output_directory`}}/{{build_name}}",
+      "source_path"                         : "{{user `packer_source_dir`}}/output-{{user `template_name`}}-vmware-base/packer-{{user `template_name`}}-vmware-base.vmx",
+      "output_directory"                    : "{{user `packer_output_dir`}}/{{build_name}}",
 
       "headless"                            : "{{user `headless`}}",
 
@@ -69,23 +60,6 @@
       "scripts"                             : [
         "{{user `common_files`}}/pooler-setup.sh"
       ]
-    }
-  ],
-
-  "post-processors"                         : [
-    {
-      "type"                                : "vsphere",
-      "host"                                : "{{user `packer_vcenter_host`}}",
-      "username"                            : "{{user `packer_vcenter_username`}}",
-      "password"                            : "{{user `packer_vcenter_password`}}",
-      "datacenter"                          : "{{user `packer_vcenter_dc`}}",
-      "cluster"                             : "{{user `packer_vcenter_cluster`}}",
-      "datastore"                           : "{{user `packer_vcenter_datastore`}}",
-      "vm_folder"                           : "{{user `packer_vcenter_folder`}}",
-      "vm_name"                             : "{{user `template_name`}}-{{user `version`}}",
-      "vm_network"                          : "{{user `packer_vcenter_net`}}",
-      "insecure"                            : "{{user `packer_vcenter_insecure`}}",
-      "overwrite"                           : "true"
     }
   ]
 }

@@ -21,14 +21,14 @@ See Background, below, for more information.
 
 The 10.12 base image is the base for all other macOS builds. To build it, you will need to supply the following environment variables:
 
-- `QA_ROOT_PASSWORD`, the common pooler VM password
+- `QA_ROOT_PASSWD_PLAIN`, the common pooler VM password
     - (The username is automatically set to `osx`)
 - `PACKER_VM_OUT_DIR`, the desired output directory for this build
 
 Example:
 
 ```bash
-$ QA_ROOT_PASSWORD="<common-pooler-password>" \
+$ QA_ROOT_PASSWD_PLAIN="<common-pooler-password>" \
     PACKER_VM_OUT_DIR="./output" \
     packer build \
     -var-file=./common/vars.json \
@@ -40,19 +40,17 @@ $ QA_ROOT_PASSWORD="<common-pooler-password>" \
 
 Once the 10.12 base build is finished, you can build and ship the 10.12 vsphere image. You will need to supply the following environment variables:
 
-- `QA_ROOT_PASSWORD`, the common pooler VM password
+- `QA_ROOT_PASSWD_PLAIN`, the common pooler VM password
     - (The username is automatically set to `osx`)
 - `PACKER_VM_SRC_DIR`, the output directory from the 10.12 base build
 - `PACKER_VM_OUT_DIR`, the desired output directory for this build
-- All vcenter-related environment variables: `PACKER_VCENTER_HOST`, `PACKER_VCENTER_USERNAME`, `PACKER_VCENTER_PASSWORD`, `PACKER_VCENTER_DC`, `PACKER_VCENTER_CLUSTER`, `PACKER_VCENTER_DATASTORE`, `PACKER_VCENTER_FOLDER`, `PACKER_VCENTER_NET`, `PACKER_VCENTER_INSECURE`, `PACKER_SHA`
 
 Example:
 
 ```bash
-$ QA_ROOT_PASSWORD="<common-pooler-password>" \
+$ QA_ROOT_PASSWD_PLAIN="<common-pooler-password>" \
     PACKER_VM_OUT_DIR="./output" \
     PACKER_VM_SRC_DIR="./output" \
-    ... (vcenter environment variables) \
     packer build \
     -var-file=./common/vars.json \
     -var-file=./10.12/x86_64/vars.json \
@@ -67,7 +65,7 @@ The 10.13 base image extends the 10.12 image - **build the 10.12 base image firs
 
 To build the 10.13 base image, you will need to supply the following environment variables:
 
-- `QA_ROOT_PASSWORD`, the common pooler VM password
+- `QA_ROOT_PASSWD_PLAIN`, the common pooler VM password
     - (The username is automatically set to `osx`)
 - `PACKER_VM_SRC_DIR`, the output directory from the 10.12 base build
 - `PACKER_VM_OUT_DIR`, the desired output directory for this build
@@ -75,7 +73,7 @@ To build the 10.13 base image, you will need to supply the following environment
 Example:
 
 ```bash
-$ QA_ROOT_PASSWORD="<common-pooler-password>" \
+$ QA_ROOT_PASSWD_PLAIN="<common-pooler-password>" \
     PACKER_VM_OUT_DIR="./output" \
     PACKER_VM_SRC_DIR="./output" \
     packer build \
@@ -88,19 +86,17 @@ $ QA_ROOT_PASSWORD="<common-pooler-password>" \
 
 Once the 10.13 base build is finished, you can build and ship the 10.13 vsphere image. You will need to supply the following environment variables:
 
-- `QA_ROOT_PASSWORD`, the common pooler VM password
+- `QA_ROOT_PASSWD_PLAIN`, the common pooler VM password
     - (The username is automatically set to `osx`)
 - `PACKER_VM_SRC_DIR`, the output directory from the 10.12 base build
 - `PACKER_VM_OUT_DIR`, the desired output directory for this build
-- All vcenter-related environment variables: `PACKER_VCENTER_HOST`, `PACKER_VCENTER_USERNAME`, `PACKER_VCENTER_PASSWORD`, `PACKER_VCENTER_DC`, `PACKER_VCENTER_CLUSTER`, `PACKER_VCENTER_DATASTORE`, `PACKER_VCENTER_FOLDER`, `PACKER_VCENTER_NET`, `PACKER_VCENTER_INSECURE`, `PACKER_SHA`
 
 Example:
 
 ```bash
-$ QA_ROOT_PASSWORD="<common-pooler-password>" \
+$ QA_ROOT_PASSWD_PLAIN="<common-pooler-password>" \
     PACKER_VM_OUT_DIR="./output" \
     PACKER_VM_SRC_DIR="./output" \
-    ... (vcenter environment variables) \
     packer build \
     -var-file=./common/vars.json \
     -var-file=./10.13/x86_64/vars.json \

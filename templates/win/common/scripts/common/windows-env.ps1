@@ -9,10 +9,11 @@ $ErrorActionPreference = 'Continue'
 Set-Variable -Option Constant -Name WindowsServer2008   -Value "6.0.*"
 Set-Variable -Option Constant -Name WindowsServer2008r2 -Value "6.1.*"
 Set-Variable -Option Constant -Name WindowsServer2012   -Value "6.2.*"
+Set-Variable -Option Constant -Name WindowsServer2012R2 -Value "6.3.*"
 Set-Variable -Option Constant -Name WindowsServer2016   -Value "10.*"
 $WindowsVersion = (Get-WmiObject win32_operatingsystem).version
 
-# Get Administrator SID 
+# Get Administrator SID
 $WindowsAdminSID =  (Get-WmiObject win32_useraccount -Filter "Sid like 'S-1-5-21-%-500'").sid
 # Crude Code to chose appropriate resonse for YesNo
 $PrimaryLanguage = (Get-Culture).TwoLetterISOLanguageName
@@ -208,19 +209,23 @@ Function Install_Win_Patch {
 # Helper Function to delete file, with try/catch to ignore errors.
 # This Function is used in both the clean host and clean-disk scripts.
 # Leaving Verbose options on in all cases so we can be certain files are being removed (IMAGES-684)
-Function ForceFullyDelete-Paths {
-  $filetodelete = $args[0]
-
+Function ForceFullyDelete-Path {
+  param(
+  [Parameter(Mandatory = $true, ValueFromPipeline = $true)]
+  [String]$Path,
+  [String]$LogFile
+  )
+  
   try {
-    if(Test-Path $filetodelete) {
-        Write-Output "Removing $filetodelete"
-        Takeown /d "$AnswerPromptYes" /R /f $filetodelete
-        Icacls $filetodelete /grant:r "*${WindowsAdminSID}:(OI)(CI)F" /t /c  2>&1
-        Remove-Item $filetodelete -Recurse -Force -Verbose
+    if(Test-Path $Path) {
+        Write-Output "Removing $Path" >> $LogFile 2>&1
+        Takeown /d "$AnswerPromptYes" /R /f $Path >> $LogFile 2>&1
+        Icacls $Path /grant:r "*${WindowsAdminSID}:(OI)(CI)F" /t /c >> $LogFile 2>&1
+        Remove-Item $Path -Recurse -Force >> $LogFile 2>&1
       }
     }
     catch {
-        Write-Output "Ignoring Error deleting: $filetodelete - Continue"
+        Write-Output "Ignoring Error deleting: $Path - Continue" >> $LogFile 2>&1
     }
 }
 
@@ -457,17 +462,23 @@ Function Remove-AppsPackages {
         "InputApp"
     )
 
-	  Get-AppXPackage -Allusers |
-	  	Where-Object {$_.Name -notmatch ($KeepAppList -join '|') -and -not $_.IsFramework} | 
-			ForEach-Object {
+    Get-AppXPackage -Allusers |
+      Where-Object {$_.Name -notmatch ($KeepAppList -join '|') -and -not $_.IsFramework} |
+      ForEach-Object {
 
-			  $AppName = $_.Name
-			  $AppFullName = $_.PackageFullName
+        $AppName = $_.Name
+        $AppFullName = $_.PackageFullName
         Write-Output "Trying to remove $AppName ($AppFullName)"
-        
+
         # Note - need to encase package removals in try catch to avoid loop fallout
         # For some reason, the SilentlyContinue doesn't always appear to be honoured.
-			  try {
+        try {
+          # Note - Deliberately removing first for the User then All users is intentional
+          # due to the unique way that Microsoft Handles Apps and Sysprep.
+          # Sarc aside - Windows.messaging doesn't remove correctly unless this is done.
+          Write-Output "Removing $AppName for User"
+          Remove-AppxPackage -Package $AppFullName -ErrorAction SilentlyContinue
+
           Write-Output "Removing $AppName for All Users"
           Remove-AppxPackage -Package $AppFullName -AllUsers -ErrorAction SilentlyContinue
         }
@@ -480,11 +491,11 @@ Function Remove-AppsPackages {
           Get-AppXProvisionedPackage -Online |
             Where-Object DisplayName -EQ $AppName |
             Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
-			  }
-			  catch {
-				  Write-Output "Ignoring errors in provisioned pkgremoval for $AppName"
-			  }		
-		}
+        }
+        catch {
+          Write-Output "Ignoring errors in provisioned pkgremoval for $AppName"
+        }
+    }
 
     # Specials for the tricky ones
     Get-AppXPackage -Name Microsoft.Windows.Cortana |
@@ -563,10 +574,10 @@ Function Test-PendingReboot {
 Function Invoke-Reboot {
     Write-Output "Starting Reboot sequence"
     Write-Output "writing restart file"
-    $restartScript="Call PowerShell -NoProfile -ExecutionPolicy bypass -command `"& A:\start-pswindowsupdate.ps1 >> c:\Packer\Logs\start-pswindowsupdate.log 2>&1`""
+    $restartScript="Call PowerShell -NoProfile -ExecutionPolicy bypass -File A:\start-pswindowsupdate.ps1 >> c:\Packer\Logs\start-pswindowsupdate.log 2>&1"
     New-Item "$startup\packer-post-restart.bat" -type file -force -value $restartScript | Out-Null
 
-	  shutdown /t 0 /r /f
+    shutdown /t 0 /r /f
     # Sleep here to stop any further command execution.
     Start-Sleep -Seconds 20
 }
@@ -627,7 +638,7 @@ Function Enable-RemoteDesktop {
       Write-Output "Disabling Remote Desktop NLA ..."
     }
     else {
-		  $obj2.SetUserAuthenticationRequired(1) | out-null
+      $obj2.SetUserAuthenticationRequired(1) | out-null
       Write-Output "Enabling Remote Desktop NLA ..."
     }
   }
@@ -670,18 +681,18 @@ Function Install-PSWindowsUpdate {
 
 # Helper to install Windows Updates.
 Function Install-WindowsUpdates {
-  Write-Output "Starting Windows updates installation. This may takes a lot of time..." 
-  
+  Write-Output "Starting Windows updates installation. This may takes a lot of time..."
+
   Import-Module PSWindowsUpdate
   if ($psversiontable.psversion.major -eq 2) {
     Write-Output "Running PSWindows Update - Ignoring errors (PS2)"
-    Get-WUInstall -AcceptAll -UpdateType Software -IgnoreReboot -Erroraction SilentlyContinue 
+    Get-WUInstall -AcceptAll -UpdateType Software -IgnoreReboot -Erroraction SilentlyContinue
   }
   else {
-    Write-Output "Running PSWindows Update" 
+    Write-Output "Running PSWindows Update"
     Get-WUInstall -AcceptAll -UpdateType Software -IgnoreReboot
-  } 
-  
+  }
+
   Write-Output "Ended Windows updates installation."
 }
 
@@ -694,7 +705,7 @@ Function Shutdown-PackerBuild {
   if ($WindowsServerCore) {
       Write-Warning "Core OS Shutdown - Cleaning up PowerShell profile workaround for startup items"
       Remove-Item -Force $PROFILE -ErrorAction SilentlyContinue
-      
+
       Remove-Item -Force -Recurse "$($env:APPDATA)\SetupFlags" -ErrorAction SilentlyContinue
   }
   # Remove the pagefile
@@ -705,7 +716,7 @@ Function Shutdown-PackerBuild {
   $System.AutomaticManagedPagefile = $true
   $System.Put()
 
-  Write-Output "Bye Bye"  
+  Write-Output "Bye Bye"
   shutdown /s /t 1 /c \"Packer Shutdown\" /f /d p:4:1
 
 }

@@ -378,5 +378,28 @@ class windows_template::policies::local_group_policies ()
             type   => 'REG_DWORD',
             notify => Windows_group_policy::Gpupdate['GPUpdate'],
         }
+        # 21. Configure the Start Layour
+        windows_group_policy::local::user { 'StartLayoutConfigLock':
+            key    => 'Software\Policies\Microsoft\Windows\Explorer',
+            value  => 'LockedStartLayout',
+            data   => 1,
+            type   => 'REG_DWORD',
+            notify => Windows_group_policy::Gpupdate['GPUpdate'],
+        }
+        windows_group_policy::local::user { 'StartLayoutConfig':
+            key    => 'Software\Policies\Microsoft\Windows\Explorer',
+            value  => 'StartLayoutFile',
+            data   => 'C:\\Packer\\Config\\StartMenuLayout.xml',
+            type   => 'REG_SZ',
+            notify => Windows_group_policy::Gpupdate['GPUpdate'],
+        }
+        # 22. Disable the first logon animation
+        windows_group_policy::local::machine { 'DisableFirstLogonAnimation':
+            key    => 'Software\Microsoft\Windows\CurrentVersion\Policies\System',
+            value  => 'EnableFirstLogonAnimation',
+            data   => 0,
+            type   => 'REG_DWORD',
+            notify => Windows_group_policy::Gpupdate['GPUpdate'],
+        }
     }
 }
