@@ -3,7 +3,7 @@
     "template_os"                           : "rhel7-64",
     "beakerhost"                            : "centos7-64",
     "version"                               : "0.0.1",
-    "iso_url"                               : "http://centos.mirror.nucleus.be/7.4.1708/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso",
+    "iso_url"                               : "http://mirror.cisp.com/CentOS/7.4.1708/isos/x86_64/CentOS-7-x86_64-DVD-1708.iso",
     "iso_checksum"                          : "ec7500d4b006702af6af023b1f8f1b890b6c7ee54400bb98cef968b883cd6546",
     "iso_checksum_type"                     : "sha256",
     "docker_base_image"                     : "centos:7.4.1708",
