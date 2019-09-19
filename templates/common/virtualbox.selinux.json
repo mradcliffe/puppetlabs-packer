@@ -9,6 +9,7 @@
       "vagrant_required_modules"             : null,
       "libvirt_nocm_qemuargs_mem_size"       : "512",
       "libvirt_nocm_qemuargs_cpu_count"      : "1",
+      "disk_size"                            : "40960",
 
       "project_root"                         : "../../../..",
       "headless"                             : "true",
@@ -62,7 +63,8 @@
                                                   "--vsys", "0",
                                                   "--description", "{{user `provisioner`}} {{user `template_name`}} {{user `template_config`}} vagrant box.",
                                                   "--version", "{{user `version`}}"
-                                               ]
+                                               ],
+      "disk_size"                            : "{{user `disk_size`}}"
     }
   ],
 
