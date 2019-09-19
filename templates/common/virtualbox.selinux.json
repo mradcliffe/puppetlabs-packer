@@ -63,8 +63,7 @@
                                                   "--vsys", "0",
                                                   "--description", "{{user `provisioner`}} {{user `template_name`}} {{user `template_config`}} vagrant box.",
                                                   "--version", "{{user `version`}}"
-                                               ],
-      "disk_size"                            : "{{user `disk_size`}}"
+                                               ]
     }
   ],
 
