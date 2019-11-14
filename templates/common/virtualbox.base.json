@@ -16,7 +16,7 @@
       "template_config"                      : "base",
       "provisioner"                          : "virtualbox",
       "shutdown_command"                     : "/sbin/halt -h -p",
-      "disk_size"                            : "20480",
+      "disk_size"                            : "40960",
       "virtualbox_base_template_os"          : null,
       "virtualbox_base_boot_wait"            : "45s",
       "virtualbox_base_required_modules"     : null,
