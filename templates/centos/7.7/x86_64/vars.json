@@ -1,6 +1,6 @@
 {
     "template_name"                         : "centos-7.7-x86_64",
-    "template_os"                           : "centos7_64Guest",
+    "template_os"                           : "rhel7-64",
     "beakerhost"                            : "centos7-64",
     "version"                               : "0.0.1",
     "iso_url"                               : "http://mirror.cisp.com/CentOS/7.7.1908/isos/x86_64/CentOS-7-x86_64-DVD-1908.iso",
