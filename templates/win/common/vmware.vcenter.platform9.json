@@ -34,7 +34,7 @@
 
   "builders": [
     {
-      "type"                   : "vsphere-23-clone",
+      "type"                   : "vsphere-clone",
 
       "name"                   : "vcenter-clone",
       "template"               : "{{user `base_template_name`}}",
@@ -55,7 +55,9 @@
       "RAM"                    : "{{user `memsize`}}",
       "RAM_reserve_all"        : "{{user `RAM_reserve_all`}}",
       "datastore"              : "{{user `packer_vcenter_datastore`}}",
-      "disk_size"              : "{{user `disk_size`}}",
+      "storage"                : [{
+          "disk_size"              : "{{user `disk_size`}}"
+      }],
       "host"                   : "",
 
       "linked_clone"           : "false",
@@ -85,6 +87,8 @@
         "echo '    \"memsize\"              : \"{{user `memsize`}}\",' >> ./tmp/build.json",
         "echo '    \"admin_username\"       : \"{{user `winrm_username`}}\",' >> ./tmp/build.json",
         "echo '    \"admin_password\"       : \"{{user `winrm_password`}}\",' >> ./tmp/build.json",
+        "echo '    \"locale\"               : \"{{user `locale`}}\",' >> ./tmp/build.json",
+        "echo '    \"ssh_platform\"         : \"{{user `ssh_platform`}}\",' >> ./tmp/build.json",
         "echo '    \"qa_root_passwd_plain\" : \"{{user `qa_root_passwd_plain`}}\",' >> ./tmp/build.json",
 
         "echo '    \"windows\" : {' >> ./tmp/build.json",
@@ -159,10 +163,6 @@
     },
     {
       "type": "windows-restart"
-    },
-    {
-      "type": "powershell",
-      "script" : "../../common/scripts/provisioners/config-winsettings.ps1"
     },
     {
       "type": "powershell",

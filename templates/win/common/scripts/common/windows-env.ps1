@@ -103,6 +103,8 @@ $CygwinDownloads = "$PackerDownloads\Cygwin"
 $PackerPsModules = "$PackerStaging\PsModules"
 $PackerAcceptance = "$PackerStaging\Acceptance"
 
+$WSLDir = "$PackerStaging\wsl"
+
 # Load in the build parameters injected from the Packer Build.
 $PackerBuildFile = "$PuppetHieradata\build.json"
 if (Test-Path "$PuppetHieradata\build.json") {
@@ -166,6 +168,7 @@ Function Create-PackerStagingDirectories {
     New-Item -ItemType Directory -Force -Path $PackerPsModules
     New-Item -ItemType Directory -Force -Path $SysInternals
     New-Item -ItemType Directory -Force -Path $PackerAcceptance
+    New-Item -ItemType Directory -Force -Path $WSLDir
 
     Touch-File "$PackerLogs/StagingDirectories.installed"
   }
@@ -338,7 +341,7 @@ Function Disable-WindowsAutoUpdate {
 Function Install-7ZipPackage {
   if (-not (Test-Path "$PackerLogs\7zip.installed")) {
     # Download and install 7za now as its needed here and is useful going forward.
-    $SevenZipInstaller = "7z1604-$ARCH.exe"
+    $SevenZipInstaller = "7z1900-$ARCH.exe"
     Write-Output "Installing 7zip $SevenZipInstaller"
     Download-File "https://artifactory.delivery.puppetlabs.net/artifactory/generic/buildsources/windows/7zip/$SevenZipInstaller"  "$Env:TEMP\$SevenZipInstaller"
     Start-Process -Wait "$Env:TEMP\$SevenZipInstaller" @SprocParms -ArgumentList "/S"
@@ -357,8 +360,8 @@ Function Install-DotNetLatest {
         $DotNetInstaller = "NDP46-KB3045557-x86-x64-AllOS-ENU.exe"
       }
       else {
-        Write-Output "Installing .Net 4.7.2"
-        $DotNetInstaller = "NDP472-KB4054530-x86-x64-AllOS-ENU.exe"
+        Write-Output "Installing .Net 4.8"
+        $DotNetInstaller = "ndp48-x86-x64-allos-enu.exe"
         if ($WindowsVersion -like $WindowsServer2008r2 -or $WindowsVersion -like $WindowsServer2012 ) {
           # Win-2008r2 & 2012 need this patch installed.
           # This will fail silently if the patch is already installed.
@@ -772,4 +775,41 @@ Function Shutdown-PackerBuild {
 
   Write-Output "Bye Bye - Shutting Down"
   shutdown /s /t 1 /c \"Packer Shutdown\" /f /d p:4:1
+}
+
+# Helper Function to set all adaptors private.
+Function Set-AllNetworkAdaptersPrivate {
+  # Set all network adapters Private
+  Write-Output "Set all network adapters private"
+  if (($WindowsVersion -like $WindowsServer2008) -or ($WindowsVersion -like $WindowsServer2008r2)) {
+
+    # This hack was obtained to set the network interface private for PS2 platforms
+    # Source https://blogs.msdn.microsoft.com/dimeby8/2009/06/10/change-unidentified-network-from-public-to-work-in-windows-7/
+    #
+    Write-Output "Using Workaround Method"
+    $NLMType = [Type]::GetTypeFromCLSID('DCB00C01-570F-4A9B-8D69-199FDBA5723B')
+    $INetworkListManager = [Activator]::CreateInstance($NLMType)
+    $NLM_ENUM_NETWORK_CONNECTED  = 1
+    $NLM_NETWORK_CATEGORY_PUBLIC = 0x00
+    $NLM_NETWORK_CATEGORY_PRIVATE = 0x01
+    $INetworks = $INetworkListManager.GetNetworks($NLM_ENUM_NETWORK_CONNECTED)
+    foreach ($INetwork in $INetworks)
+    {
+        $Name = $INetwork.GetName()
+        $Category = $INetwork.GetCategory()
+        Write-Output "Network $Name, Category $Category"
+        if ($INetwork.IsConnected -and ($Category -eq $NLM_NETWORK_CATEGORY_PUBLIC) -and ($Name -eq "Unidentified network" -or $Name -eq "Network"))
+        {
+          Write-Output "Setting Network Private"
+            $INetwork.SetCategory($NLM_NETWORK_CATEGORY_PRIVATE)
+        }
+      }
+  }
+  else {
+      # Use cmdlet to run through network interfacen and set them private.
+      New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff" -Force -ErrorAction SilentlyContinue
+      Set-NetConnectionProfile  -InterfaceIndex (Get-NetConnectionProfile).InterfaceIndex -NetworkCategory Private
+  }
+
+
 }

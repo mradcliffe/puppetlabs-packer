@@ -43,9 +43,10 @@ if (-not (Test-Path "$PackerLogs\BootstrapSchedTask.installed")) {
 # Enable WSUS - this is being put at the top of the script deliberately as a recycle of wuauserv is
 # required - this most reliable way to do this is with a reboot so we want to get this out the way first
 # to prevent windows update starting anything.
-# Windows-10/2016 LTSB seem to consistenly break on WSUS, so disable WSUS completely for these.
+# DO NOT USE WSUS for Windows-10 (changed from Jan 2020) as too many SSU issues with it.
+# So WSUS is primarily for servicing Windows 2012r2 and then mainly for slipstreaming purposes
 # Same seems to apply to win-2012 so disabling for this too.
-if ($WindowsVersion -like $WindowsServer2012 -or ($WindowsVersion -like $WindowsServer2016 -and $WindowsInstallationType -eq "Client" -and $WindowsReleaseID -eq "1607")) {
+if ($WindowsVersion -like $WindowsServer2012 -or $WindowsVersion -like $WindowsServer2016 ) {
   Write-Output "Bypassing WSUS - Go Direct to Microsoft for updates"
   Disable-WindowsAutoUpdate
 }
@@ -85,18 +86,6 @@ if (-not (Test-Path "$PackerLogs\HyperVisorExtensions.installed")) {
       $vproc.WaitForExit()
       break
     }
-    "virtualbox" {
-      # VirtualBox installs only
-      # Install Virtual Box extensions
-      Write-Output "Install VirtualBox Tools cert"
-      $vproc = Start-Process certutil  @SprocParms -ArgumentList '-addstore -f "TrustedPublisher" A:\oracle-cert-1.cer'
-      $vproc.WaitForExit()
-
-      Write-Output "Installing Virtual Box Extensions"
-      $vproc = Start-Process "E:\VBoxWindowsAdditions.exe" @SprocParms -ArgumentList '/S'
-      $vproc.WaitForExit()
-      break
-    }
   }
   Touch-File "$PackerLogs\HyperVisorExtensions.installed"
   Write-Output "Forcing Reboot to fully install Hypervisor extension/toolset and restart wuauserv"
@@ -104,37 +93,7 @@ if (-not (Test-Path "$PackerLogs\HyperVisorExtensions.installed")) {
 }
 
 if (-not (Test-Path "$PackerLogs\PrivatiseNetAdapters.installed")) {
-  # Set all network adapters Private
-  Write-Output "Set all network adapters private"
-  if (($WindowsVersion -like $WindowsServer2008) -or ($WindowsVersion -like $WindowsServer2008r2)) {
-
-    # This hack was obtained to set the network interface private for PS2 platforms
-    # Source https://blogs.msdn.microsoft.com/dimeby8/2009/06/10/change-unidentified-network-from-public-to-work-in-windows-7/
-    #
-    Write-Output "Using Workaround Method"
-    $NLMType = [Type]::GetTypeFromCLSID('DCB00C01-570F-4A9B-8D69-199FDBA5723B')
-    $INetworkListManager = [Activator]::CreateInstance($NLMType)
-    $NLM_ENUM_NETWORK_CONNECTED  = 1
-    $NLM_NETWORK_CATEGORY_PUBLIC = 0x00
-    $NLM_NETWORK_CATEGORY_PRIVATE = 0x01
-    $INetworks = $INetworkListManager.GetNetworks($NLM_ENUM_NETWORK_CONNECTED)
-    foreach ($INetwork in $INetworks)
-    {
-        $Name = $INetwork.GetName()
-        $Category = $INetwork.GetCategory()
-        Write-Output "Network $Name, Category $Category"
-        if ($INetwork.IsConnected -and ($Category -eq $NLM_NETWORK_CATEGORY_PUBLIC) -and ($Name -eq "Unidentified network" -or $Name -eq "Network"))
-        {
-          Write-Output "Setting Network Private"
-            $INetwork.SetCategory($NLM_NETWORK_CATEGORY_PRIVATE)
-        }
-      }
-  }
-  else {
-      # Use cmdlet to run through network interfacen and set them private.
-      New-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff" -Force -ErrorAction SilentlyContinue
-      Set-NetConnectionProfile  -InterfaceIndex (Get-NetConnectionProfile).InterfaceIndex -NetworkCategory Private
-  }
+  Set-AllNetworkAdaptersPrivate
   Touch-File "$PackerLogs\PrivatiseNetAdapters.installed"
 }
 

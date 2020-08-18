@@ -29,7 +29,7 @@ class packer::vsphere::params {
     'Ubuntu': {
       $bootstrap_file        = '/etc/vsphere-bootstrap.rb'
       $bootstrap_file_source = 'ubuntu.rb.erb'
-      if $facts['operatingsystemrelease'] in ['18.04', '18.10'] {
+      if $facts['operatingsystemrelease'] in ['18.04', '18.10', '20.04'] {
         $startup_file          = '/etc/systemd/system/vsphere.bootstrap.service'
         $startup_file_source   = 'vsphere.bootstrap.service'
         $startup_file_perms    = '0644'
@@ -101,7 +101,7 @@ class packer::vsphere::params {
     }
 
     'Fedora': {
-      if $facts['operatingsystemrelease'] in ['28', '29', '30'] {
+      if $facts['operatingsystemrelease'] in ['28', '29', '30', '31', '32'] {
         $startup_file          = '/etc/systemd/system/vsphere.bootstrap.service'
         $startup_file_source   = 'vsphere.bootstrap.service'
         $startup_file_perms    = '0644'
@@ -118,21 +118,21 @@ class packer::vsphere::params {
     # TODO check if this can work with Solaris 11 main template
     'Solaris': {
       if $facts['operatingsystemrelease'] in ['11.4', '11.2'] {
-        $ruby_package       = [ 'ruby' ]
+        $ruby_package          = [ 'ruby' ]
         $bootstrap_file_source = 'solaris.rb.erb'
         $bootstrap_file        = '/etc/vsphere-bootstrap.rb'
-        $startup_file = '/etc/init.d/rc.local'
+        $startup_file          = '/etc/init.d/rc.local'
         $startup_file_source   = 'rc.local'
       }
     }
 
     'Darwin' : {
-      $bootstrap_file_source = 'osx.rb.erb'
-      $bootstrap_file        = '/etc/vsphere-bootstrap.rb'
-      $startup_file = '/etc/rc.local'
-      $startup_file_source   = 'rc.local'
-      $startup_file_perms    = '0644'
-      $startup_file_plist = '/Library/LaunchDaemons/local.localhost.startup.plist'
+      $bootstrap_file_source     = 'osx.rb.erb'
+      $bootstrap_file            = '/etc/vsphere-bootstrap.rb'
+      $startup_file              = '/etc/rc.local'
+      $startup_file_source       = 'rc.local'
+      $startup_file_perms        = '0755'
+      $startup_file_plist        = '/Library/LaunchDaemons/local.localhost.startup.plist'
       $startup_file_plist_source = 'local.localhost.startup.plist'
     }
 

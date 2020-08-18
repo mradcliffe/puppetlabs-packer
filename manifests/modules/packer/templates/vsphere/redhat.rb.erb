@@ -14,7 +14,7 @@ File.open('/etc/hostname', 'w') do |f|
   f.write(hostname)
 end
 
-<% if ['7', '8', '28', '29', '30'].include? @operatingsystemmajrelease -%>
+<% if ['7', '8', '28', '29', '30', '31', '32'].include? @operatingsystemmajrelease -%>
 # systemd-networkd
 Kernel.system("/usr/bin/hostnamectl set-hostname #{hostname}")
 <% else -%>
@@ -30,15 +30,25 @@ puts '- Re-obtaining DHCP lease...'
     Kernel.system('/usr/sbin/ifup ens33')
   <% end -%>
   <% if @operatingsystemmajrelease == '7' -%>
-    network_interface_name = `ls /sys/class/net -I lo`.chomp
-    puts 'network_interface_name is: '
-    puts "#{network_interface_name}"
-    File.open("/var/lib/NetworkManager/dhclient-#{network_interface_name}.conf", 'a') do |f|
-      f << "send host-name #{hostname}"
+    network_interfaces_name = `ls /sys/class/net -I lo`.chomp
+    network_interfaces_name.split(" ").each do |network_interface_name|
+      puts 'network_interface_name is: #{network_interface_name}'
+      cfg_file="/etc/sysconfig/network-scripts/ifcfg-#{network_interface_name}"
+      if File.exists?(cfg_file) && File.readlines(cfg_file).grep(/File Managed by Puppet/).size > 0
+        File.open("/var/lib/NetworkManager/dhclient-#{network_interface_name}.conf", 'a') do |f|
+          f << "send host-name \"#{hostname}\";"
+        end
+      else
+        Kernel.system("nmcli con add con-name #{network_interface_name} type ethernet ifname #{network_interface_name}")
+      end
+      Kernel.system("/usr/sbin/ifdown #{network_interface_name}")
     end
+
     Kernel.system('/sbin/service NetworkManager restart')
-    Kernel.system("/usr/sbin/ifdown #{network_interface_name}")
-    Kernel.system("/usr/sbin/ifup #{network_interface_name}")
+
+    network_interfaces_name.split(" ").each do |network_interface_name|
+      Kernel.system("/usr/sbin/ifup #{network_interface_name}")
+    end
   <% end -%>
   <% if @operatingsystemmajrelease == '6' -%>
     File.open('/etc/dhcp/dhclient-eth0.conf', 'a') do |f|
@@ -59,7 +69,7 @@ puts '- Re-obtaining DHCP lease...'
 <% end -%>
 
 <% if @operatingsystem == 'Fedora' -%>
-  <% if ['28', '29', '30'].include? @operatingsystemrelease -%>
+  <% if ['28', '29', '30', '31', '32'].include? @operatingsystemrelease -%>
 # systemd-networkd's DHCP client uses /etc/machine-id instead of the
 # link layer address (as dhclient does) to generate a client ID.
 # /etc/machine-id will be the same on VMs cloned from the same template,
@@ -75,7 +85,7 @@ Kernel.system('/sbin/service NetworkManager restart')
 
 puts '- Cleaning up...'
 
-<% if ['28', '29', '30'].include? @operatingsystemrelease -%>
+<% if ['28', '29', '30', '31'].include? @operatingsystemrelease -%>
 # With systemd-networkd, disable the oneshot service that runs this script:
 Kernel.system('/bin/systemctl disable vsphere.bootstrap.service')
 <% else -%>

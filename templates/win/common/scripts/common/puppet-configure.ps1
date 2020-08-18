@@ -16,8 +16,8 @@ write-output "Script: packer-puppet-configure.ps1 Starting at: $rundate"
 $PuppetCounterFile = "$PackerLogs\Puppet.Counter"
 
 if (-not (Test-Path "$PuppetCounterFile")) {
-  New-Item -Path $PuppetCounterFile
-  Set-Content -Path $PuppetCounterFile "0"
+  New-Item -ItemType file -Path $PuppetCounterFile -Force
+  Set-Content -Path $PuppetCounterFile "0" -Force
 }
 
 # TODO What about custom facts?
@@ -30,6 +30,8 @@ $ENV:FACTER_modules_path         = "$PuppetModulesPath"
 $ENV:FACTER_packer_downloads     = "$PackerDownloads"
 $ENV:FACTER_packer_config        = "$PackerConfig"
 $ENV:FACTER_sysinternals         = "$SysInternals"
+$ENV:FACTER_wsldir               = "$WSLDir"
+$ENV:FACTER_windir               = "$ENV:WINDIR"
 # Pick Up user attributes as these could be localised.
 $ENV:FACTER_administrator_sid     =  $WindowsAdminSID
 $ENV:FACTER_administrator_grp_sid = "S-1-5-32-544"
@@ -40,12 +42,6 @@ if ("$ARCH" -eq "x86") {
   $ENV:FACTER_chrome_root        = "$ENV:ProgramFiles\Google\Chrome"
 } else {
   $ENV:FACTER_chrome_root        = "$ENV:ProgramFiles `(x86`)\Google\Chrome"
-}
-If ( $WindowsServerCore ) {
-  $ENV:FACTER_windows_install_option = "Core"
-}
-else {
-  $ENV:FACTER_windows_install_option = "Normal"
 }
 
 # Puppet run loop - use the Manifest in the Config Directory and run Puppet as many times up

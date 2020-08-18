@@ -4,9 +4,13 @@
 # Specific versions are supported now (e.g. we need to stick to Powershell 1.0.6)
 # TODO Support custom forge URLs
 
+puppetlabs-pwshlib
 puppetlabs-powershell
 puppetlabs-registry
 puppetlabs-stdlib
 puppet-download_file
 puppet-archive
 puppet-windows_env
+puppet-windowsfeature
+puppetlabs-reboot
+ayohrling-local_security_policy

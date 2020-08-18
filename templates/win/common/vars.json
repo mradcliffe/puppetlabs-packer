@@ -1,5 +1,5 @@
 {
-  "version"             : "20190613",
+  "version"             : "20200813",
 
   "headless"            : "true",
 
@@ -9,6 +9,10 @@
   "winupdate_timeout"   : "400m",
   "puppetconfig_timeout": "60m", 
   "shutdown_timeout"    : "1h",
+
+  "locale"              : "en-US",
+
+  "ssh_platform"        : "cygwin-2.4.0",
   
   "image_index"         : "2",
 
