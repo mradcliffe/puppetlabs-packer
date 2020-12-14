@@ -50,7 +50,7 @@ Some very basic linting has been added to ensure files parse properly through pa
 
 * Build the base box for the centos version you want:
    * `cd templates/centos/7.7/x86_64`
-   * `PACKER_VM_OUTPUT_DIR=. packer build -var-file=../../common/vars.json -var-file=vars.json ../../common/virtualbox.base.json`
+   * `PACKER_VM_OUTPUT_DIR=. packer build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.base.json`
 * Build the selinux box for the centos version you want based on the base box of that version:
    * `cd templates/centos/7.7/x86_64`
    * `PACKER_VM_OUTPUT_DIR=. packer build -var-file=../../common/vars.json -var-file=vars.json ../../../common/virtualbox.selinux.json`

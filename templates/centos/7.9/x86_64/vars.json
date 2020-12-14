@@ -1,0 +1,15 @@
+{
+    "template_name"                         : "centos-7.9-x86_64",
+    "template_os"                           : "rhel7-64",
+    "beakerhost"                            : "centos7-64",
+    "version"                               : "0.0.1",
+    "iso_url"                               : "http://yum.tamu.edu/centos/7.9.2009/isos/x86_64/CentOS-7-x86_64-DVD-2009.iso",
+    "iso_checksum"                          : "e33d7b1ea7a9e2f38c8f693215dd85254c3a4fe446f93f563279715b68d07987",
+    "iso_checksum_type"                     : "sha256",
+    "docker_base_image"                     : "centos:7.9.2009",
+    "virtualbox_base_template_os"           : "RedHat_64",
+    "vmware_vsphere_nocm_vmx_data_memsize"  : "4096",
+    "vmware_vsphere_nocm_vmx_data_numvcpus" : "2",
+    "puppet_aio"                            : "http://yum.puppetlabs.com/el/7/PC1/x86_64/puppet-agent-1.10.9-1.el7.x86_64.rpm",
+    "iso_name"                              : "CentOS-7-x86_64-DVD-2009.iso"
+}
